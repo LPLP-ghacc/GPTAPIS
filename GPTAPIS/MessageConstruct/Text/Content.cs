@@ -1,0 +1,47 @@
+﻿using System.Text.Json.Serialization;
+using GPTAPIS.MessageConstruct.Enums;
+
+namespace GPTAPIS.MessageConstruct.Text;
+
+public sealed class Content
+{
+    public Content() { }
+
+    public Content(ContentType type, string input)
+    {
+        Type = type;
+
+        switch (Type)
+        {
+            case ContentType.Text:
+                Text = input;
+                break;
+            case ContentType.ImageUrl:
+                ImageUrl = new ImageUrl(input);
+                break;
+        }
+    }
+
+    public Content(ImageUrl imageUrl)
+    {
+        Type = ContentType.ImageUrl;
+        ImageUrl = imageUrl;
+    }
+
+    [JsonInclude]
+    [JsonPropertyName("type")]
+    [JsonConverter(typeof(JsonStringEnumConverter<ContentType>))]
+    public ContentType Type { get; private set; }
+
+    [JsonInclude]
+    [JsonPropertyName("text")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string Text { get; private set; }
+
+    [JsonInclude]
+    [JsonPropertyName("image_url")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public ImageUrl ImageUrl { get; private set; }
+
+    public static implicit operator Content(ImageUrl imageUrl) => new Content(imageUrl);
+}
