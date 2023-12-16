@@ -1,10 +1,37 @@
 ﻿using GPTAPIS.MessageConstruct.Text;
+using System.IO;
 using System.Text.Json.Serialization;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace GPTAPIS.Net.Api.Text;
 
 public class ChatRequestForm
 {
+    /// <summary>
+    /// Standart Form
+    /// </summary>
+    /// <param name="messages"></param>
+    /// <param name="model"></param>
+    /// <param name="stream"></param>
+    public ChatRequestForm(IReadOnlyList<Message> messages, string model, bool stream)
+    {
+        Messages = messages;
+        Model = model;
+
+        FrequencyPenalty = 0;
+        LogitBias = null;
+        MaxTokens = 4096;
+        Number = 1;
+        PresencePenalty = 0;
+        Seed = 0;
+        Stops = null;
+        Stream = stream;
+        Temperature = 1;
+        TopP = 1;
+        ToolChoice = null;
+        User = "User";
+    }
+
     public ChatRequestForm(IReadOnlyList<Message> messages,
         Model model,
         double? frequencyPenalty = 0,
@@ -22,18 +49,18 @@ public class ChatRequestForm
     {
         Messages = messages;
         Model = ModelConvert.GetModel(model);
+        LogitBias = logitBias ?? new Dictionary<string, double>();
         FrequencyPenalty = frequencyPenalty;
-        LogitBias = logitBias;
         MaxTokens = maxTokens;
         Number = number;
         PresencePenalty = presencePenalty;
         Seed = seed;
-        Stops = stops;
+        Stops = stops ?? Array.Empty<string>();
         Stream = stream;
         Temperature = temperature;
         TopP = topP;
         ToolChoice = toolChoice;
-        User = user;
+        User = user; 
     }
 
     /// <summary>
