@@ -10,10 +10,12 @@ public class APIService
         Username = username;
         HttpClient = client;
         ChatEndpoint = new ChatEndpoint(client, this);
+        AssistantEndPoint = new AssistantEndPoint(client, this);
     }
 
     public string ApiKey { get; set; }
     public string Username { get; set; }
     public HttpClient HttpClient { get; set; }
     public ChatEndpoint ChatEndpoint { get; private set; }
+    public AssistantEndPoint AssistantEndPoint { get; private set;}
 }

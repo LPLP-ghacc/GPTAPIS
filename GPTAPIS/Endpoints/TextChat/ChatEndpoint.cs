@@ -18,7 +18,7 @@ public sealed class ChatEndpoint : BaseEndpoint
         Client = client;
         Service = service;
         EnableDebug = enableDebug;
-        Messages = new List<MessageContent>();
+        Messages = new List<Message>();
 
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Service.ApiKey);
         Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -28,7 +28,7 @@ public sealed class ChatEndpoint : BaseEndpoint
     public override HttpClient Client { get; }
     public override APIService Service { get; }
     public override bool EnableDebug { get; }
-    public List<MessageContent> Messages { get; set; }
+    public List<Message> Messages { get; set; }
 
     #region Text generation
     public async Task<ChatResponse> GetCompletionAsync(List<Message> messages, Model model)
@@ -199,7 +199,7 @@ public sealed class ChatEndpoint : BaseEndpoint
             complitedResponseContent += partialResponse.Choices[0].Delta.Content;
             responseHandler?.Invoke(partialResponse);
         }
-        result.Choices[0].Message = new MessageContent(complitedResponseContent, Role.assistant.ToString());
+        result.Choices[0].Message = new Message(Role.assistant, complitedResponseContent);
 
         return result;
     }

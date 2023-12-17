@@ -5,18 +5,8 @@ namespace GPTAPIS.Endpoints.TextChat.Assistants;
 
 public class Assistant
 {
-    /// <summary>
-    /// For serialization
-    /// </summary>
-    public Assistant(Model model, string name, string instructions)
+    public Assistant()
     {
-        Model = model;
-        Name = name;
-        Instructions = instructions;
-        Description = "";
-        Tools = new List<Tool>();
-        FileIds = new List<string>();
-        Metadata = new Dictionary<string, object>();
     }
 
     /// <summary>
@@ -36,7 +26,7 @@ public class Assistant
         ID = iD;
         Object = @object;
         CreatedAt = createdAt;
-        Model = model;
+        Model = ModelConvert.GetModel(model);
         Name = name;
         Description = description;
         Instructions = instructions;
@@ -68,7 +58,7 @@ public class Assistant
 
     [JsonInclude]
     [JsonPropertyName("model")]
-    public Model Model { get; set; }
+    public string Model { get; set; }
 
     [JsonInclude]
     [JsonPropertyName("name")]
@@ -95,5 +85,21 @@ public class Assistant
     public Dictionary<string, object> Metadata
     {
         get; set;
+    }
+
+    public static Assistant CreateAssistant(Model model, string name, string instructions)
+    {
+        Assistant assistant = new()
+        {
+            Model = ModelConvert.GetModel(model),
+            Name = name,
+            Instructions = instructions,
+            Description = "",
+            Tools = new List<Tool>(),
+            FileIds = new List<string>(),
+            Metadata = new Dictionary<string, object>()
+        };
+
+        return assistant;
     }
 }

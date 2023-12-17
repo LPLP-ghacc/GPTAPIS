@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GPTAPIS.MessageConstruct.Text;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace GPTAPIS.Net.Api.Text;
@@ -42,7 +43,7 @@ public class ChatResponse
 
 public class Choice
 {
-    public Choice(string finishReason, int index, MessageContent message)
+    public Choice(string finishReason, int index, Message message)
     {
         FinishReason = finishReason;
         Index = index;
@@ -51,7 +52,8 @@ public class Choice
 
     [JsonInclude]
     [JsonPropertyName("delta")]
-    public Delta Delta { get; set; } // Предположим, что в Choice есть поле Delta
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public Delta Delta { get; private set; }
 
     [JsonInclude]
     [JsonPropertyName("finish_reason")]
@@ -63,7 +65,8 @@ public class Choice
 
     [JsonInclude]
     [JsonPropertyName("message")]
-    public MessageContent Message { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public Message Message { get; set; }
 }
 
 public class Delta
@@ -85,10 +88,11 @@ public class Delta
 
 public class MessageContent
 {
-    public MessageContent(string content, string role)
+    public MessageContent(string content, string role, string name = "")
     {
         Content = content;
         Role = role;
+        Name = name;
     }
 
     [JsonInclude]
@@ -98,6 +102,10 @@ public class MessageContent
     [JsonInclude]
     [JsonPropertyName("role")]
     public string Role { get; set; }
+
+    [JsonInclude]
+    [JsonPropertyName("name")]
+    public string Name { get; set; } 
 }
 
 public class UsageInfo

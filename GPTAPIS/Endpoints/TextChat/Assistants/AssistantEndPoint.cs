@@ -9,7 +9,7 @@ namespace GPTAPIS.Endpoints.TextChat;
 
 public sealed class AssistantEndPoint : BaseEndpoint
 {
-    public AssistantEndPoint(HttpClient client, APIService service, bool enableDebug)
+    public AssistantEndPoint(HttpClient client, APIService service, bool enableDebug = true)
     {
         Address = "https://api.openai.com/v1/assistants";
         Client = client;
@@ -18,6 +18,7 @@ public sealed class AssistantEndPoint : BaseEndpoint
 
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Service.ApiKey);
         Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        Client.DefaultRequestHeaders.Add("OpenAI-Beta", "assistants=v1");
     }
 
     public override string Address { get; }
@@ -40,7 +41,7 @@ public sealed class AssistantEndPoint : BaseEndpoint
 
         var payload = new
         {
-            model = ModelConvert.GetModel(assistant.Model),
+            model = assistant.Model,
             name = assistant.Name,
             description = assistant.Description,
             instructions = assistant.Instructions,
@@ -67,6 +68,11 @@ public sealed class AssistantEndPoint : BaseEndpoint
         if (EnableDebug)
             Console.WriteLine(responseString);
 
-        return JsonSerializer.Deserialize<Assistant>(responseString);
+        var assist = JsonSerializer.Deserialize<Assistant>(responseString);
+
+        if(assist == null)
+            Console.WriteLine("Error when JsonSerializer.Deserialize<Assistant>(responseString)");
+
+        return assist;
     }
 }

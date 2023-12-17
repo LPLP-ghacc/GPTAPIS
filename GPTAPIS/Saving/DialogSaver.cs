@@ -1,4 +1,5 @@
-﻿using GPTAPIS.Net.Api.Text;
+﻿using GPTAPIS.MessageConstruct.Text;
+using GPTAPIS.Net.Api.Text;
 using System.Text.Json;
 
 namespace GPTAPIS.Saving;
@@ -32,7 +33,7 @@ public class DialogSaver
     /// </summary>
     public string? Saving(string filename)
     {
-        List<MessageContent> chat = Service.ChatEndpoint.Messages;
+        List<Message> chat = Service.ChatEndpoint.Messages;
         string json = JsonSerializer.Serialize(chat);
 
         SavingPath = string.IsNullOrEmpty(SavingPath) ? documentsPath : SavingPath;

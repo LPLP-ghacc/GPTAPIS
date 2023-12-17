@@ -10,9 +10,6 @@ public class ChatRequestForm
     /// <summary>
     /// Standart Form
     /// </summary>
-    /// <param name="messages"></param>
-    /// <param name="model"></param>
-    /// <param name="stream"></param>
     public ChatRequestForm(IReadOnlyList<Message> messages, string model, bool stream)
     {
         Messages = messages;
