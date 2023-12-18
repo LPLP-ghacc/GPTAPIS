@@ -1,10 +1,9 @@
-﻿namespace GPTAPIS.MessageConstruct.Enums
+﻿namespace GPTAPIS.MessageConstruct;
+
+public enum Role
 {
-    public enum Role
-    {
-        system = 1,
-        assistant,
-        user,
-        tool
-    }
+system = 1,
+assistant,
+user,
+tool
 }

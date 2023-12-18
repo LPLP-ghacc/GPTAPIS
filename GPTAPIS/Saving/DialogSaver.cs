@@ -1,8 +1,8 @@
-﻿using GPTAPIS.MessageConstruct.Text;
+﻿using GPTAPIS.MessageConstruct;
 using GPTAPIS.Net.Api.Text;
 using System.Text.Json;
 
-namespace GPTAPIS.Saving;
+namespace GPTAPIS;
 
 public class DialogSaver
 {

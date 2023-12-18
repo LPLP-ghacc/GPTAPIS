@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace GPTAPIS.Saving;
+namespace GPTAPIS;
 
 public static class Profiling
 {
@@ -45,16 +45,17 @@ public static class Profiling
 
 public class GPTAPISProfile
 {
-    public GPTAPISProfile() { }
-
-    public GPTAPISProfile(string apikey, string userName, string proxyUrl, string proxyPassword)
+    public GPTAPISProfile(string apikey, string userName, string proxyUrl, string proxyPort, string proxyUsername, string proxyPassword)
     {
         Apikey = apikey;
         UserName = userName;
         ProxyUrl = proxyUrl;
+        ProxyPort = proxyPort;
+        ProxyUsername = proxyUsername;
         ProxyPassword = proxyPassword;
     }
 
+    [JsonInclude]    
     [JsonPropertyName("apikey")]
     public string Apikey { get; set; }
 
@@ -62,9 +63,19 @@ public class GPTAPISProfile
     public string UserName { get; set; }
 
     [JsonPropertyName("proxyurl")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string ProxyUrl { get; set; }
 
+    [JsonPropertyName("proxyport")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string ProxyPort { get; set; }
+
+    [JsonPropertyName("proxyusername")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string ProxyUsername { get; set; }
+
     [JsonPropertyName("proxypass")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string ProxyPassword { get; set; }
 }
 

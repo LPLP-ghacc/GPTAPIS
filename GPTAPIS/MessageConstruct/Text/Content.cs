@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
-using GPTAPIS.MessageConstruct.Enums;
 
-namespace GPTAPIS.MessageConstruct.Text;
+namespace GPTAPIS.MessageConstruct;
 
 public sealed class Content
 {

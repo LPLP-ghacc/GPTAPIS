@@ -1,4 +1,4 @@
-﻿using GPTAPIS.MessageConstruct.Text;
+﻿using GPTAPIS.MessageConstruct;
 using System.Text.Json.Serialization;
 
 namespace GPTAPIS.Endpoints.TextChat.Assistants;

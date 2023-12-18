@@ -1,7 +1,5 @@
-﻿using GPTAPIS.MessageConstruct.Text;
-using System.IO;
+﻿using GPTAPIS.MessageConstruct;
 using System.Text.Json.Serialization;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace GPTAPIS.Net.Api.Text;
 

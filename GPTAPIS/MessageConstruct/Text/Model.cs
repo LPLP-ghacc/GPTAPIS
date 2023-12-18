@@ -1,4 +1,4 @@
-﻿namespace GPTAPIS.MessageConstruct.Text;
+﻿namespace GPTAPIS.MessageConstruct;
 
 public enum Model
 {

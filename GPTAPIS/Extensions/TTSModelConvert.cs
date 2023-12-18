@@ -1,4 +1,4 @@
-﻿using GPTAPIS.MessageConstruct.Enums;
+﻿using GPTAPIS.MessageConstruct;
 
 namespace GPTAPIS.Net.Api.Speech
 {

@@ -1,4 +1,4 @@
-﻿using GPTAPIS.MessageConstruct.Text;
+﻿using GPTAPIS.MessageConstruct;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 

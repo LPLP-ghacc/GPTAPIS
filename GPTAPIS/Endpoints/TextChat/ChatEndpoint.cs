@@ -1,12 +1,10 @@
 ﻿using GPTAPIS.Extensions;
-using GPTAPIS.MessageConstruct.Enums;
-using GPTAPIS.MessageConstruct.Text;
+using GPTAPIS.MessageConstruct;
 using GPTAPIS.Net.Api.Text;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
 
 namespace GPTAPIS.Endpoints.TextChat;
 

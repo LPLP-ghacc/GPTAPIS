@@ -1,5 +1,5 @@
 ﻿using GPTAPIS.Endpoints.TextChat.Assistants;
-using GPTAPIS.MessageConstruct.Text;
+using GPTAPIS.MessageConstruct;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
