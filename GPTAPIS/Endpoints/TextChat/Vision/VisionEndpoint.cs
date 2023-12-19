@@ -27,14 +27,14 @@ namespace GPTAPIS.Endpoints.TextChat.Vision
         public override bool EnableDebug { get; }
 
 
-        public async Task<ChatResponse> GetCompletionAsync()
-        {
-
-        }
-
-        private async Task<ChatResponse> SendRequestAsync()
-        {
-
-        }
+        //public async Task<ChatResponse> GetCompletionAsync()
+        //{
+        //
+        //}
+        //
+        //private async Task<ChatResponse> SendRequestAsync()
+        //{
+        //
+        //}
     }
 }

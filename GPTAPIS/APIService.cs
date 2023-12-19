@@ -14,7 +14,7 @@ public class APIService
         Username = username;
         HttpClient = client;
         ChatEndpoint = new ChatEndpoint(HttpClient, this);
-        AssistantEndPoint = new AssistantEndPoint(HttpClient, this);
+        AssistantEndPoint = new AssistantEndpoint(HttpClient, this);
         VisionEndpoint = new VisionEndpoint(HttpClient, this);
     }
 
@@ -46,15 +46,15 @@ public class APIService
         }
 
         ChatEndpoint = new ChatEndpoint(HttpClient, this);
-        AssistantEndPoint = new AssistantEndPoint(HttpClient, this);
+        AssistantEndPoint = new AssistantEndpoint(HttpClient, this);
         VisionEndpoint = new VisionEndpoint(HttpClient, this);
     }
 
-    public string ApiKey { get; set; }
+    public string ApiKey { get; private set; }
     public string Username { get; set; }
     public HttpClient HttpClient { get; set; }
     public ChatEndpoint ChatEndpoint { get; private set; }
-    public AssistantEndPoint AssistantEndPoint { get; private set;}
+    public AssistantEndpoint AssistantEndPoint { get; private set;}
     public VisionEndpoint VisionEndpoint { get; private set; }
 
     public static async Task SaveProfile(GPTAPISProfile profile, string? path = null)

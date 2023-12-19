@@ -7,5 +7,5 @@ public enum ContentType
     [EnumMember(Value = "text")]
     Text,
     [EnumMember(Value = "image_url")]
-    ImageUrl
+    ImageUrl,
 }
