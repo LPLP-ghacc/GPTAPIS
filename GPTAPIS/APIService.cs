@@ -57,7 +57,7 @@ public class APIService
     public AssistantEndpoint AssistantEndPoint { get; private set;}
     public VisionEndpoint VisionEndpoint { get; private set; }
 
-    public static async Task SaveProfile(GPTAPISProfile profile, string? path = null)
+    public async Task SaveProfile(GPTAPISProfile? profile = null, string? path = null)
     {
         string savePath = string.IsNullOrEmpty(path) ? Environment.CurrentDirectory + $"/Profiles/{profile.UserName}.json" : path;
 

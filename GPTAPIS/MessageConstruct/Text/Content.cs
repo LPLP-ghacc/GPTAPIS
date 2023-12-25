@@ -12,10 +12,10 @@ public sealed class Content
 
         switch (Type)
         {
-            case ContentType.Text:
+            case ContentType.text:
                 Text = input;
                 break;
-            case ContentType.ImageUrl:
+            case ContentType.image_url:
                 ImageUrl = new ImageUrl(input);
                 break;
         }
@@ -23,7 +23,7 @@ public sealed class Content
 
     public Content(ImageUrl imageUrl)
     {
-        Type = ContentType.ImageUrl;
+        Type = ContentType.image_url;
         ImageUrl = imageUrl;
     }
 

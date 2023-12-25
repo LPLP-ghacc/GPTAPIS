@@ -55,7 +55,7 @@ public class DialogSaver
 
     /// <summary>
     /// The developer recommends using this method 
-    /// if the user has no ideas for their own filename generator.
+    /// if the user has no ideas for their own filename generator.<br/>
     /// The first sentence in the first message can be used as input.
     /// </summary>
     public static string MakeValidFileName(string input)

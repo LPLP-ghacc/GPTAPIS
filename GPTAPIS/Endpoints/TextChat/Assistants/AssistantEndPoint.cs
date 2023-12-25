@@ -4,12 +4,17 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using ThreadResponse = GPTAPIS.Endpoints.TextChat.Assistants.ThreadResponse;
 
 namespace GPTAPIS.Endpoints.TextChat;
 
 public sealed class AssistantEndpoint : BaseEndpoint
 {
+    public Action? OnStatusQueued;
+    public Action? OnStatusInProgress;
+    public Action? OnStatusCompleted;
+
     public AssistantEndpoint(HttpClient client, APIService service, ThreadResponse[]? threads = null, bool enableDebug = true)
     {
         Address = "https://api.openai.com/v1/assistants";
@@ -29,6 +34,7 @@ public sealed class AssistantEndpoint : BaseEndpoint
     public override APIService Service { get; }
     public override bool EnableDebug { get; }
     public List<ThreadResponse> Threads { get; set; }
+    public ThreadResponse lastThread = new ThreadResponse();
 
     public async Task<ThreadResponse?> AddThread()
     {
@@ -37,6 +43,7 @@ public sealed class AssistantEndpoint : BaseEndpoint
         if(thread != null)
         {
             Threads.Add(thread);
+            lastThread = thread;
             return thread;
         }
         else
@@ -48,63 +55,131 @@ public sealed class AssistantEndpoint : BaseEndpoint
         return null;
     }
 
-    public async Task<ThreadResponse?> DeleteThread(string threadId)
+    public async Task<string?> AddMessage(Message message, string threadID)
     {
-        string requestUri = $"https://api.openai.com/v1/threads/{threadId}";
+        if (string.IsNullOrEmpty(threadID) && EnableDebug) 
+            Console.WriteLine("threadID = null");
 
-        try
+        var requestBody = new
         {
-            HttpResponseMessage response = await Client.DeleteAsync(requestUri);
+            role = message.Role,
+            content = message.Content
+        };
 
-            response.EnsureSuccessStatusCode();
+        var jsonContent = JsonSerializer.Serialize(requestBody);
+        if (EnableDebug) Console.WriteLine(jsonContent);
+        var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+        string requestUri = $"https://api.openai.com/v1/threads/{threadID}/messages";
+        var result = await SendRequest(requestUri, contentString);
 
-            var obj = JsonSerializer.Deserialize<ThreadResponse>(responseBody);
+        return result != null ? result : null;
+    }
 
-            Console.WriteLine($"Thread {threadId} has been successfully deleted.\n" +
-                $"HTTP status: {(int)response.StatusCode} {response.ReasonPhrase}");
+    public async Task<ThreadResponse?> RunThread(string threadID, string assistantID)
+    {
+        if (string.IsNullOrEmpty(assistantID) && EnableDebug)
+            Console.WriteLine($"assistantID = null");
 
-            if(obj != null)
-            {
-                return obj;
-            }
-            else
-            {
-                if (EnableDebug) Console.WriteLine("obj == null");
-            }
-        }
-        catch (HttpRequestException e)
+        var requestBody = new
         {
-            Console.WriteLine($"Ошибка запроса: {e.Message}");
+            assistant_id = assistantID
+        };
+
+        var jsonContent = JsonSerializer.Serialize(requestBody);
+        if (EnableDebug) Console.WriteLine(jsonContent);
+
+        var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        string requestUri = $"https://api.openai.com/v1/threads/{threadID}/runs";
+        var response = await SendRequest(requestUri, contentString);
+        if(response != null)
+        {
+            ThreadResponse? result = JsonSerializer.Deserialize<ThreadResponse>(response);
+            return result;
         }
 
         return null;
     }
 
-    public async Task<string> AddMessage(string message, string threadID)
+    public async Task<ThreadResponse?> GetRunStatus(string threadID, string runID)
     {
-        var requestBody = new
+        string requestUri = $"https://api.openai.com/v1/threads/{threadID}/runs/{runID}";
+        HttpResponseMessage response = await Client.GetAsync(requestUri);
+        response.EnsureSuccessStatusCode();
+        string responseBody = await response.Content.ReadAsStringAsync();
+        ThreadResponse? result = JsonSerializer.Deserialize<ThreadResponse>(responseBody);
+        return result != null ? result : null;
+    }
+
+    /// <summary>
+    /// Method returns a statusCode relative to the request, where 0 is queued, 1 is in_progress, and 2 is completed.<br/> 
+    /// When the statusCode reaches 2, the method exits the loop body.
+    /// </summary>
+    public async Task<int> FromStatusCode(string threadID, string runID)
+    {
+        int statusCode = 0;
+
+        while (true)
         {
-            inputs = message
-        };
+            var response = await GetRunStatus(threadID, runID);
 
-        var jsonContent = JsonSerializer.Serialize(requestBody);
-        var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            if (response == null)
+            {
+                throw new Exception("Response from GetRunStatus = null");
+            }
 
-        string requestUri = $"https://api.openai.com/v1/assistants/{threadID}/messages";
+            switch (response.Status)
+            {
+                case ("queued"):
+                    statusCode = 0;
 
-        try
-        {
-            HttpResponseMessage response = await Client.PostAsync(requestUri, contentString);
-            response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
+                    if (EnableDebug) Console.WriteLine($"StatusCode : {response.Status} ({statusCode})");
+                    OnStatusQueued?.Invoke();
+                    break;
+                case ("in_progress"):
+                    statusCode = 1;
 
-            return responseBody;
+                    if (EnableDebug) Console.WriteLine($"StatusCode : {response.Status} ({statusCode})");
+                    OnStatusInProgress?.Invoke();
+                    break;
+                case ("completed"):
+                    statusCode = 2;
+
+                    if (EnableDebug) Console.WriteLine($"StatusCode : {response.Status} ({statusCode})");
+                    OnStatusCompleted?.Invoke();
+                    break;
+                default:
+                    throw new Exception("Unknown status");
+            }
+
+            if (statusCode == 2)
+            {
+                break;
+            }
+
+            await Task.Delay(1000);
         }
-        catch (HttpRequestException e)
+
+        return statusCode;
+    }
+
+    public async Task<ThreadResponse[]?> GetMessages(string threadID)
+    {
+        string requestUri = $"https://api.openai.com/v1/threads/{threadID}/messages";
+
+        HttpResponseMessage response = await Client.GetAsync(requestUri);
+        response.EnsureSuccessStatusCode();
+        string responseBody = await response.Content.ReadAsStringAsync();
+
+        ThreadResponse? response1 = JsonSerializer.Deserialize<ThreadResponse?>(responseBody);        
+        
+        if(response1 != null)
         {
-            return $"Error: {e.Message}";
+            return response1.Data;          
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -141,7 +216,6 @@ public sealed class AssistantEndpoint : BaseEndpoint
 
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await Client.PostAsync(Address, content);
-
         var responseString = await response.Content.ReadAsStringAsync();
 
         if (EnableDebug)
@@ -209,20 +283,72 @@ public sealed class AssistantEndpoint : BaseEndpoint
         var contentString = new StringContent("", Encoding.UTF8, "application/json");
         string requestUri = $"https://api.openai.com/v1/threads";
 
-        ThreadResponse? threadResponce = null;
+        string? response = await SendRequest(requestUri, contentString);
+
+        if(response != null)
+        {
+            ThreadResponse? result = JsonSerializer.Deserialize<ThreadResponse>(response);
+
+            return result;
+        }
+
+        return null;
+    }
+
+    public async Task DeleteLastThread()
+    {
+        await DeleteThread(lastThread.Id);
+    }
+
+    public async Task<ThreadResponse?> DeleteThread(string threadId)
+    {
+        string requestUri = $"https://api.openai.com/v1/threads/{threadId}";
+
+        try
+        {
+            HttpResponseMessage response = await Client.DeleteAsync(requestUri);
+
+            response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            var obj = JsonSerializer.Deserialize<ThreadResponse>(responseBody);
+
+            Console.WriteLine($"Thread {threadId} has been successfully deleted.\n" +
+                $"HTTP status: {(int)response.StatusCode} {response.ReasonPhrase}");
+
+            if (obj != null)
+            {
+                return obj;
+            }
+            else
+            {
+                if (EnableDebug) Console.WriteLine("obj == null");
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteLine($"Ошибка запроса: {e.Message}");
+        }
+
+        return null;
+    }
+
+    private async Task<string?> SendRequest(string requestUri, StringContent contentString)
+    {
+        if (EnableDebug) Console.WriteLine($"requestUri : {requestUri}");
+        
         try
         {
             HttpResponseMessage response = await Client.PostAsync(requestUri, contentString);
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
-
-            threadResponce = JsonSerializer.Deserialize<ThreadResponse>(responseBody);
+            return responseBody;
         }
         catch (HttpRequestException e)
         {
             Console.WriteLine($"Error: {e.Message}");
+            return null;
         }
-
-        return threadResponce == null ? threadResponce : null;
     }
 }
